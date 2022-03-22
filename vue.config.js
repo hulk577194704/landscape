@@ -16,9 +16,9 @@ module.exports = {
 		// },
 	},
 	lintOnSave: false, // 是否关闭eslint语法检查，默认 true, 警告仅仅会被输出到命令行，且不会使得编译失败。
-	outputDir: "dist", // 默认是 dist ,存放打包文件的目录,
-	assetsDir: "static", // 存放生成的静态资源 (js、css、img、fonts) 的 (相对于 outputDir) 目录
-	indexPath: "index.html", // 默认 index.html, 指定生成的 index.html 的输出路径 (相对于 outputDir)。
+	outputDir: "build", // 默认是 dist ,存放打包文件的目录,
+	// assetsDir: "static", // 存放生成的静态资源 (js、css、img、fonts) 的 (相对于 outputDir) 目录
+	// indexPath: "index.html", // 默认 index.html, 指定生成的 index.html 的输出路径 (相对于 outputDir)。
 	productionSourceMap: false, // 打包时, 不生成 .map 文件, 加快打包构建
-	
+	publicPath:'./',
 };
