@@ -1,36 +1,293 @@
 <template>
   <div id="contianer" class="contianer">
     <div class="header"></div>
+    <grid-layout
 
-    <div>
-      <el-upload
-        action=""
-        class="upload-demo"
-        :http-request="addLSJson.bind(this, lsData)"
-        :show-file-list="false"
-        style="display: inline; margin: 0 10px"
+      :col-num="test1"
+      :row-height="5"
+      :min-height="1"
+    >
+    </grid-layout>
+
+    <!-- <hr />
+
+    <div class="collectionClass">
+      <grid-layout
+        :layout.sync="collections"
+        :col-num="150"
+        :row-height="5"
+        :min-height="1"
+        :vertical-compact="true"
+        :use-css-transforms="true"
+        :auto-size="true"
+        @layout-updated="saveCollections"
       >
-        <el-button type="primary" size="mini">导入整体布局JSON数据 </el-button>
-      </el-upload>
-      <el-button
-        type="primary"
-        size="mini"
-        @click="exportSettingFile('wholeSetting', lsData)"
-        >导出整体布局JSON数据
-      </el-button>
-      <el-button type="primary" size="mini" @click="addLsShow">新增 </el-button>
-      <el-button type="primary" size="mini" @click="editStatus = !editStatus"
-        >开启编辑</el-button
-      >
-      <!-- <el-button type="primary" size="mini" @click="addLsShow">隐藏 </el-button> -->
-    </div>
-    <hr />
+        <grid-item
+          v-for="gridItem in collections"
+          :x="gridItem.x"
+          :y="gridItem.y"
+          :w="gridItem.w"
+          :h="gridItem.h"
+          :i="gridItem.i"
+          :key="gridItem.i"
+        >
+          <span
+            v-show="editStatus"
+            style="position: absolute; left: 2px; top: 0; cursor: pointer"
+          >
+            <el-popover placement="bottom-end" trigger="hover">
+              <div class="pop-list">
+                <div class="list-item" @click="changeImageFormat(gridItem)">
+                  切换样式
+                </div>
+                <div class="list-item" @click="changeItemBorder(gridItem)">
+                  {{ gridItem.border == 1 ? "隐藏边框" : "显示边框" }}
+                </div>
+                <div class="list-item" @click="changeItemShadow(gridItem)">
+                  {{ gridItem.shadow == 1 ? "隐藏阴影" : "显示阴影" }}
+                </div>
+                <div v-if="gridItem.itemType == 2">
+                  <div class="list-item" @click="changeItemDirection(gridItem)">
+                    切换方向
+                  </div>
+                  <div class="list-item">
+                    <div>
+                      <div>内容</div>
+                      <el-input
+                        clearable
+                        class="input"
+                        size="mini"
+                        style="margin: 0 5px"
+                        v-model="gridItem.name"
+                        @blur="saveLsData"
+                      ></el-input>
+                    </div>
+                  </div>
+
+                  <div class="list-item">
+                    <div>
+                      <div>背景颜色</div>
+                      <el-input
+                        clearable
+                        class="input"
+                        size="mini"
+                        style="margin: 0 5px"
+                        v-model="gridItem.bgColor"
+                        @blur="saveLsData"
+                      ></el-input>
+                    </div>
+                  </div>
+                  <div class="list-item">
+                    <div>
+                      <div>字体颜色</div>
+                      <el-input
+                        clearable
+                        class="input"
+                        size="mini"
+                        style="margin: 0 5px"
+                        v-model="gridItem.fontColor"
+                        @blur="saveLsData"
+                      ></el-input>
+                    </div>
+                  </div>
+                  <div class="list-item">
+                    <div>
+                      <div>字体</div>
+                      <el-button
+                        style="padding: 5px 8px"
+                        size="mini"
+                        type="success"
+                        @click="changeFontSize(gridItem, -2)"
+                        >-</el-button
+                      >
+                      <el-input
+                        class="input"
+                        size="mini"
+                        style="margin: 0 5px; width: 30px"
+                        v-model="gridItem.fontSize"
+                        @blur="saveLsData"
+                      ></el-input>
+                      <el-button
+                        style="padding: 5px 8px"
+                        size="mini"
+                        type="success"
+                        @click="changeFontSize(gridItem, 2)"
+                        >+</el-button
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <i class="el-icon-plus" slot="reference"></i>
+            </el-popover>
+          </span>
+          <span
+            v-show="editStatus"
+            class="remove"
+            @click="removeItem(gridItem.i, collections)"
+            >x</span
+          >
+          <div
+            class="content"
+            :style="{
+              border: gridItem.border == 0 ? 'none' : '',
+              'box-shadow':
+                gridItem.shadow == 1
+                  ? 'rgba(0, 0, 0, 0.2) 0px 4px 8px 0px,rgba(0, 0, 0, 0.2) 0px 6px 20px 0px'
+                  : '',
+            }"
+          >
+            <div
+              v-if="gridItem.itemType == 1"
+              :key="gridItem.name"
+              class="grid-big"
+            >
+              <div class="box" :style="{ background: gridItem.color }">
+                <img
+                  crossOrigin="Anonymous"
+                  :src="gridItem.src"
+                  :alt="gridItem.name"
+                />
+                <div class="img-title">
+                  {{ gridItem.name }}
+                </div>
+              </div>
+            </div>
+            <div
+              v-else-if="gridItem.itemType == 0"
+              :key="gridItem.name"
+              class="grid"
+            >
+              <img
+                height="48"
+                width="48"
+                crossOrigin="Anonymous"
+                :src="gridItem.src"
+                :alt="gridItem.name"
+              />
+            </div>
+            <div
+              class="text-item"
+              :style="{
+                background: gridItem.bgColor,
+              }"
+              v-else
+            >
+              <div
+                :style="{
+                  color: gridItem.fontColor,
+                  'font-size': gridItem.fontSize
+                    ? gridItem.fontSize + 'px'
+                    : '',
+                  'writing-mode':
+                    gridItem.direction && gridItem.direction != 0
+                      ? 'vertical-rl'
+                      : '',
+                  transform: gridItem.direction == 2 ? 'rotate(180deg)' : '',
+                }"
+              >
+                {{ gridItem.name }}
+              </div>
+            </div>
+          </div>
+        </grid-item>
+      </grid-layout>
+    </div> -->
     <div>
-      <div @drag="drag" @dragend="dragend" class="droppable-element" draggable="true"
-             unselectable="on">Droppable Element (Drag me!)</div>
-    
+      <div>
+        <el-form
+          :mydata="searchForm"
+          ref="searchForm"
+          :inline="true"
+          :rules="rules"
+          :model="searchForm"
+          class="demo-form-inline"
+        >
+          <el-form-item label="搜索图标">
+            <el-input
+              class="input-new-tag"
+              v-model="inputValue"
+              ref="saveTagInput"
+              @keyup.enter.native="handleInputConfirm"
+              @blur="handleInputConfirm"
+            >
+              <el-tag
+                slot="prepend"
+                :key="tag"
+                v-for="tag in dynamicTags"
+                closable
+                :disable-transitions="false"
+                @close="handleClose(tag)"
+              >
+                {{ tag }}
+              </el-tag>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="">
+            <el-button
+              type="primary"
+              icon="el-icon-search"
+              circle
+              @click="searchSvg"
+            ></el-button>
+          </el-form-item>
+          <!-- <el-form-item label="">
+            <el-upload
+              action=""
+              class="upload-demo"
+              :http-request="
+                importToSelected.bind(this, addImageDialog.tempArr)
+              "
+              :show-file-list="false"
+            >
+              <el-button type="primary"
+                >导入json，格式[{"name":"","src":""}]</el-button
+              >
+            </el-upload>
+          </el-form-item> -->
+        </el-form>
+        <div class="center">
+          <div style="width: 53%">
+            <div
+              style="
+                max-height: 200px;
+                overflow: auto;
+                display: flex;
+                flex-wrap: wrap;
+                padding-right: 0px;
+              "
+            >
+              <div
+                style="padding: 20px"
+                v-for="(item, index) in resultArray"
+                :key="item.src + index"
+                @drag="drag"
+                @dragend="dragend"
+                @mousedown="dragClick(item)"
+              >
+                <img
+                  v-if="!item.itemType"
+                  :src="item.src"
+                  class="image"
+                  :alt="item.name"
+                />
+                <div
+                  draggable="true"
+                  style="border: 1px solid grey"
+                  class="text-item"
+                  v-else
+                >
+                  {{ item.name }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
     <hr />
+
     <el-tabs
       class="tabsClass"
       v-model="tabsValue"
@@ -46,6 +303,34 @@
         :label="item.title"
         :name="item.name"
       >
+        <div>
+          <el-upload
+            action=""
+            class="upload-demo"
+            :http-request="addLSJson.bind(this, lsData)"
+            :show-file-list="false"
+            style="display: inline; margin: 0 10px"
+          >
+            <el-button type="primary" size="mini">导入JSON </el-button>
+          </el-upload>
+          <el-button
+            type="primary"
+            size="mini"
+            @click="exportSettingFile('wholeSetting', lsData)"
+            >导出JSON
+          </el-button>
+          <el-button type="primary" size="mini" @click="addLsShow"
+            >新增画板
+          </el-button>
+          <el-button
+            type="primary"
+            size="mini"
+            @click="editStatus = !editStatus"
+            >开启编辑</el-button
+          >
+          <!-- <el-button type="primary" size="mini" @click="addLsShow">隐藏 </el-button> -->
+        </div>
+        <hr />
         <grid-layout
           :layout.sync="lsData"
           :col-num="12"
@@ -66,78 +351,68 @@
             :i="ls.i"
             :key="ls.i"
           >
-            <div
-              class="landscape"
-              :style="{
-                'flex-direction': ls.direction == 1 ? 'row' : 'column',
-              }"
-            >
-              <div
-                class="main-title-box"
-                :style="{
-                  'flex-direction': ls.direction == 1 ? 'column' : 'row',
-                  background: ls.titleBgColor,
-                }"
-              >
-                <div class="plus">
-                  <el-popover placement="bottom-end" trigger="hover">
-                    <div class="pop-list">
-                      <div class="list-item" @click="editGridShow(ls)">
-                        编辑标题
-                      </div>
-                      <div
-                        class="list-item"
-                        @click="openAddGridDialog(ls.grids)"
-                      >
-                        新建
-                      </div>
-                      <div class="list-item" @click="exportToPng(ls.i)">
-                        导出内容为png
-                      </div>
-                      <el-upload
-                        action=""
-                        class="upload-demo"
-                        :http-request="addLSJson.bind(this, ls.grids)"
-                        :show-file-list="false"
-                      >
-                        <div class="list-item">导入内容</div>
-                      </el-upload>
-                      <div
-                        class="list-item"
-                        @click="exportSettingFile(ls.title, ls.grids)"
-                      >
-                        导出内容
-                      </div>
-                      <div class="list-item" @click="changeDirection(ls)">
-                        切换方向
-                      </div>
-                      <el-popover placement="top" width="160">
-                        <p>确定删除？</p>
-                        <div style="text-align: right; margin: 0">
-                          <el-button size="mini" type="text">取消</el-button>
-                          <el-button
-                            type="primary"
-                            size="mini"
-                            @click="deleteArrayItem(ls, lsData)"
-                            >确定</el-button
-                          >
-                        </div>
-                        <div class="list-item" slot="reference">删除</div>
-                      </el-popover>
+            <div class="landscape">
+              <div style="position: absolute">
+                <el-popover placement="bottom-end" trigger="hover">
+                  <div class="pop-list">
+                    <div class="list-item" @click="addChildArea(ls.grids)">
+                      新建区域
                     </div>
-                    <i class="el-icon-plus" slot="reference"></i>
-                  </el-popover>
-                </div>
-                <div
-                  class="title-text"
-                  :style="
-                    ls.direction == 1 &&
-                    'writing-mode: vertical-rl;transform: rotate(180deg);margin:30px 10px;'
-                  "
-                >
-                  {{ ls.title }}
-                </div>
+                    <div class="list-item">
+                      <div>
+                        <div>背景颜色</div>
+                        <el-input
+                          clearable
+                          class="input"
+                          size="mini"
+                          style="margin: 0 5px"
+                          v-model="ls.contentBgColor"
+                          @blur="saveLsData"
+                        ></el-input>
+                      </div>
+                    </div>
+                    <!-- <div class="list-item" @click="exportToPng(ls.i)">
+                      导出内容为png
+                    </div> -->
+                    <el-upload
+                      action=""
+                      class="upload-demo"
+                      :http-request="addLSJson.bind(this, ls.grids)"
+                      :show-file-list="false"
+                    >
+                      <div class="list-item">导入内容</div>
+                    </el-upload>
+                    <div
+                      class="list-item"
+                      @click="exportSettingFile(ls.i, ls.grids)"
+                    >
+                      导出内容
+                    </div>
+                    <el-popover placement="top" width="160">
+                      <p>确定删除？</p>
+                      <div style="text-align: right; margin: 0">
+                        <el-button size="mini" type="text">取消</el-button>
+                        <el-button
+                          type="primary"
+                          size="mini"
+                          @click="deleteArrayItem(ls, lsData)"
+                          >确定</el-button
+                        >
+                      </div>
+                      <div class="list-item" slot="reference">删除</div>
+                    </el-popover>
+                  </div>
+                  <div v-show="editStatus" class="plus" slot="reference">
+                    <i class="el-icon-plus"></i>
+                    <!-- <el-button
+                      icon="el-icon-plus"
+                      size="mini"
+                      circle
+                    ></el-button> -->
+                  </div>
+                </el-popover>
               </div>
+
               <div
                 :id="ls.i"
                 :ref="ls.i"
@@ -167,84 +442,82 @@
                   >
                     <div class="ls-item" style="height: 100%">
                       <div class="main">
-                        <div class="plus" style="top: 5px; left: 5px">
-                          <div style="position: relative">
-                            <el-popover placement="bottom-end" trigger="hover">
-                              <div class="pop-list">
-                                <div
-                                  class="list-item"
-                                  @click="editGridShow(grid)"
-                                >
-                                  编辑标题
+                        <div style="position: absolute">
+                          <el-popover placement="bottom-end" trigger="hover">
+                            <div class="pop-list">
+                              <div class="list-item">
+                                <div>
+                                  <div>背景颜色</div>
+                                  <el-input
+                                    clearable
+                                    class="input"
+                                    size="mini"
+                                    style="margin: 0 5px"
+                                    v-model="grid.contentBgColor"
+                                    @blur="saveLsData"
+                                  ></el-input>
                                 </div>
-                                <div
-                                  class="list-item"
-                                  @click="openAddImageDialog(grid.gridItems)"
-                                >
-                                  手动添加
-                                </div>
-                                <div
-                                  class="list-item"
-                                  @click="exportToPng(grid.i)"
-                                >
-                                  导出内容为png
-                                </div>
-                                <el-upload
-                                  action=""
-                                  class="upload-demo"
-                                  :http-request="
-                                    addLSJson.bind(this, grid.gridItems)
-                                  "
-                                  :show-file-list="false"
-                                >
-                                  <div class="list-item">导入内容</div>
-                                </el-upload>
-                                <div
-                                  class="list-item"
-                                  @click="
-                                    exportSettingFile(
-                                      grid.title,
-                                      grid.gridItems
-                                    )
-                                  "
-                                >
-                                  导出内容
-                                </div>
-                                <div
-                                  class="list-item"
-                                  @click="changeDirection(grid)"
-                                >
-                                  切换方向
-                                </div>
-                                <el-popover placement="top" width="160">
-                                  <p>确定删除？</p>
-                                  <div style="text-align: right; margin: 0">
-                                    <el-button size="mini" type="text"
-                                      >取消</el-button
-                                    >
-                                    <el-button
-                                      type="primary"
-                                      size="mini"
-                                      @click="deleteArrayItem(grid, ls.grids)"
-                                      >确定</el-button
-                                    >
-                                  </div>
-                                  <div class="list-item" slot="reference">
-                                    删除
-                                  </div>
-                                </el-popover>
                               </div>
-                              <i class="el-icon-plus" slot="reference"></i>
-                            </el-popover>
-                          </div>
+                              <!-- <div
+                                class="list-item"
+                                @click="exportToPng(grid.i)"
+                              >
+                                导出内容为png
+                              </div> -->
+                              <el-upload
+                                action=""
+                                class="upload-demo"
+                                :http-request="
+                                  addLSJson.bind(this, grid.gridItems)
+                                "
+                                :show-file-list="false"
+                              >
+                                <div class="list-item">导入内容</div>
+                              </el-upload>
+                              <div
+                                class="list-item"
+                                @click="
+                                  exportSettingFile(grid.i, grid.gridItems)
+                                "
+                              >
+                                导出内容
+                              </div>
+                              <el-popover placement="top" width="160">
+                                <p>确定删除？</p>
+                                <div style="text-align: right; margin: 0">
+                                  <el-button size="mini" type="text"
+                                    >取消</el-button
+                                  >
+                                  <el-button
+                                    type="primary"
+                                    size="mini"
+                                    @click="deleteArrayItem(grid, ls.grids)"
+                                    >确定</el-button
+                                  >
+                                </div>
+                                <div class="list-item" slot="reference">
+                                  删除
+                                </div>
+                              </el-popover>
+                            </div>
+                            <div
+                              v-show="editStatus"
+                              class="plus"
+                              slot="reference"
+                            >
+                              <i class="el-icon-plus"></i>
+                            </div>
+                          </el-popover>
                         </div>
+
                         <div
-                          :id="grid.i"
-                          :ref="grid.i"
                           class="item-content"
                           :style="{ background: grid.contentBgColor }"
                         >
                           <grid-layout
+                            :data="grid"
+                            :id="grid.i"
+                            :ref="grid.i"
                             :layout.sync="grid.gridItems"
                             :col-num="150"
                             :row-height="5"
@@ -279,6 +552,14 @@
                                   trigger="hover"
                                 >
                                   <div class="pop-list">
+                                    <div
+                                      class="list-item"
+                                      @click="
+                                        copyItem(gridItem, grid.gridItems)
+                                      "
+                                    >
+                                      复制组件
+                                    </div>
                                     <div
                                       class="list-item"
                                       @click="changeImageFormat(gridItem)"
@@ -334,7 +615,7 @@
                                             class="input"
                                             size="mini"
                                             style="margin: 0 5px"
-                                            v-model="gridItem.bgColor"
+                                            v-model="gridItem.contentBgColor"
                                             @blur="saveLsData"
                                           ></el-input>
                                         </div>
@@ -381,6 +662,28 @@
                                         </div>
                                       </div>
                                     </div>
+                                    <el-popover placement="top" width="160">
+                                      <p>确定删除？</p>
+                                      <div style="text-align: right; margin: 0">
+                                        <el-button size="mini" type="text"
+                                          >取消</el-button
+                                        >
+                                        <el-button
+                                          type="primary"
+                                          size="mini"
+                                          @click="
+                                            removeItem(
+                                              gridItem.i,
+                                              grid.gridItems
+                                            )
+                                          "
+                                          >确定</el-button
+                                        >
+                                      </div>
+                                      <div class="list-item" slot="reference">
+                                        删除
+                                      </div>
+                                    </el-popover>
                                   </div>
                                   <i class="el-icon-plus" slot="reference"></i>
                                 </el-popover>
@@ -411,7 +714,6 @@
                                     :style="{ background: gridItem.color }"
                                   >
                                     <img
-                                      crossOrigin="Anonymous"
                                       :src="gridItem.src"
                                       :alt="gridItem.name"
                                     />
@@ -428,7 +730,6 @@
                                   <img
                                     height="48"
                                     width="48"
-                                    crossOrigin="Anonymous"
                                     :src="gridItem.src"
                                     :alt="gridItem.name"
                                   />
@@ -436,7 +737,7 @@
                                 <div
                                   class="text-item"
                                   :style="{
-                                    background: gridItem.bgColor,
+                                    background: gridItem.contentBgColor,
                                   }"
                                   v-else
                                 >
@@ -463,7 +764,6 @@
                               </div>
                             </grid-item>
                           </grid-layout>
-                          <!-- <template v-for="gridItem in grid.gridItems"> </template> -->
                         </div>
                       </div>
                     </div>
@@ -476,7 +776,7 @@
       </el-tab-pane>
     </el-tabs>
 
-    <el-dialog
+    <!-- <el-dialog
       title="手动添加"
       :visible.sync="addImageDialog.dialogVisible"
       width="80%"
@@ -529,8 +829,6 @@
             >
           </el-upload>
         </el-form-item>
-        <!-- <el-form-item label="活动区域">
-        </el-form-item> -->
       </el-form>
       <div class="center">
         <div style="width: 53%">
@@ -596,7 +894,7 @@
         >
         <el-button type="primary" @click="addImageConfirm">确 定</el-button>
       </span>
-    </el-dialog>
+    </el-dialog> -->
     <el-dialog
       :title="addGridDialog.title"
       :visible.sync="addGridDialog.dialogVisible"
@@ -630,7 +928,7 @@
     </el-dialog>
 
     <el-dialog
-      title="提示"
+      title="新建标签页"
       :visible.sync="addTabDialog.dialogVisible"
       width="30%"
     >
@@ -660,6 +958,8 @@ import VueGridLayout from "vue-grid-layout";
 import { v4 as uuid } from "uuid";
 import html2canvas from "html2canvas";
 import canvas2image from "@/utils/canvas2image";
+let mouseXY = { x: null, y: null };
+let DragPos = { x: null, y: null, w: 1, h: 1, i: null };
 export default {
   data() {
     return {
@@ -716,10 +1016,7 @@ export default {
           y: 0,
           w: 4,
           h: 7,
-          i: "App Definition and Development",
-          direction: 0,
-          title: "App Definition and Development",
-          titleBgColor: "",
+          i: uuid(),
           contentBgColor: "",
           grids: [
             {
@@ -727,22 +1024,21 @@ export default {
               y: 0,
               w: 85,
               h: 14,
-              i: "Kubernetes Kubernetes",
-              title: "Kubernetes Kubernetes",
-              titleBgColor: "",
+              i: uuid(),
               contentBgColor: "",
-              direction: 0,
               gridItems: [
                 {
                   x: 4,
                   y: 0,
                   w: 106,
                   h: 6,
-                  i: "Apache CarbonData1",
+                  i: uuid(),
                   itemType: 1,
-                  color: "rgb(24, 54, 114)",
-                  size: 2,
                   fontSize: 22,
+                  border: 1,
+                  shadow: 0,
+                  direction: 0,
+                  fontColor: "",
                   name: "Apache CarbonData1",
                   src: "https://landscape.cncf.io/logos/apache-carbon-data.svg",
                   moved: false,
@@ -766,6 +1062,32 @@ export default {
         },
       ],
       tabsValue: "1",
+      currentAboveLayout: [],
+      currentAboveId: "",
+      mouseInGrid: false,
+      searchDiv: {
+        inputValue: "",
+      },
+      dragItem: {},
+      collections: [],
+      defaultCollections: [
+        {
+          x: 1,
+          y: 0,
+          w: 18,
+          h: 8,
+          i: uuid(),
+          itemType: 0,
+          fontSize: 22,
+          border: 1,
+          shadow: 0,
+          direction: 0,
+          fontColor: "",
+          name: "Apache CarbonData1",
+          src: "https://landscape.cncf.io/logos/apache-carbon-data.svg",
+          moved: false,
+        },
+      ],
     };
   },
   components: {
@@ -775,6 +1097,7 @@ export default {
   created() {
     this.getLsTabs();
     this.getLsData();
+    this.getCollections();
   },
 
   watch: {
@@ -788,7 +1111,18 @@ export default {
     //   deep: true,
     // },
   },
-  mounted() {},
+  mounted() {
+    document.addEventListener(
+      "dragover",
+      function (e) {
+        mouseXY.x = e.clientX;
+        mouseXY.y = e.clientY;
+      },
+      false
+    );
+    console.log("...........", this);
+    console.log("searchForm...........", this.$refs["searchForm"]);
+  },
   beforeDestroy() {},
   methods: {
     changeFontSize(item, num) {
@@ -803,7 +1137,15 @@ export default {
       if (lsDataStr) {
         this.lsData = JSON.parse(lsDataStr);
       } else {
-        this.lsData = this.defaultLsData;
+        this.lsData = this.defaultCollections;
+      }
+    },
+    getCollections() {
+      let collectionsStr = localStorage.getItem("collections");
+      if (collectionsStr) {
+        this.collections = JSON.parse(collectionsStr);
+      } else {
+        this.collections = this.defaultCollections;
       }
     },
     getLsTabs() {
@@ -1002,11 +1344,12 @@ export default {
         src: item.src,
         x: (this.addImageDialog.currentArray.length * 2) % 12,
         y: this.addImageDialog.currentArray.length + 12, // puts it at the bottom
-        w: 2,
-        h: 2,
+        w: 30,
+        h: 5,
         i: uuid(),
       });
     },
+
     importToSelected(data, param) {
       this.addLSJson(data, param, () => {
         console.log("this.addImageDialog.tempArr", this.addImageDialog.tempArr);
@@ -1014,14 +1357,13 @@ export default {
           this.addImageDialog.selected.push({
             itemType: item.itemType ? item.itemType : 0,
             fontSize: 22,
-            direction: 0,
             border: 1,
             name: item.name,
             src: item.src,
             x: (this.addImageDialog.currentArray.length * 2) % 12,
             y: this.addImageDialog.currentArray.length + 12, // puts it at the bottom
-            w: 2,
-            h: 2,
+            w: 30,
+            h: 5,
             i: uuid(),
           });
         });
@@ -1072,17 +1414,10 @@ export default {
         data.size = 1;
       }
     },
-    openAddGridDialog(grids) {
-      this.addGridDialog.title = "新增子";
-      this.addGridDialog.grids = grids;
 
-      this.addGridDialog.dialogVisible = true;
-    },
     editGridShow(item) {
       this.addGridDialog.title = "编辑";
       this.addGridDialog.grid = item;
-      this.addGridDialog.inputValue = item.title;
-      this.addGridDialog.titleBgColor = item.titleBgColor;
       this.addGridDialog.contentBgColor = item.contentBgColor;
 
       this.addGridDialog.dialogVisible = true;
@@ -1103,8 +1438,8 @@ export default {
           gridItems: [],
           x: (this.addGridDialog.grids.length * 2) % 12,
           y: this.addGridDialog.grids.length + 12, // puts it at the bottom
-          w: 2,
-          h: 5,
+          w: 20,
+          h: 20,
           i: uuid(),
         });
       } else if (this.addGridDialog.title == "新增父") {
@@ -1149,6 +1484,9 @@ export default {
     saveLsTabs() {
       localStorage.setItem("lsTabs", JSON.stringify(this.lsTabs));
     },
+    saveCollections() {
+      localStorage.setItem("collections", JSON.stringify(this.collections));
+    },
     clearGridDialog() {
       this.addGridDialog = {
         inputValue: "",
@@ -1192,118 +1530,120 @@ export default {
       this.saveLsData();
     },
     drag(e) {
-      let parentRect = document
-        .getElementById("item-content")
-        .getBoundingClientRect();
-      let mouseInGrid = false;
-      if (
-        mouseXY.x > parentRect.left &&
-        mouseXY.x < parentRect.right &&
-        mouseXY.y > parentRect.top &&
-        mouseXY.y < parentRect.bottom
-      ) {
-        mouseInGrid = true;
-      }
-      if (
-        mouseInGrid === true &&
-        this.layout.findIndex((item) => item.i === "drop") === -1
-      ) {
-        this.layout.push({
-          x: (this.layout.length * 2) % (this.colNum || 12),
-          y: this.layout.length + (this.colNum || 12), // puts it at the bottom
-          w: 1,
-          h: 1,
-          i: "drop",
-        });
-      }
-      let index = this.layout.findIndex((item) => item.i === "drop");
-      if (index !== -1) {
-        try {
-          this.$refs.gridlayout.$children[
-            this.layout.length
-          ].$refs.item.style.display = "none";
-        } catch {}
-        let el = this.$refs.gridlayout.$children[index];
-        el.dragging = {
-          top: mouseXY.y - parentRect.top,
-          left: mouseXY.x - parentRect.left,
-        };
-        let new_pos = el.calcXY(
-          mouseXY.y - parentRect.top,
-          mouseXY.x - parentRect.left
-        );
-        if (mouseInGrid === true) {
-          this.$refs.gridlayout.dragEvent(
-            "dragstart",
-            "drop",
-            new_pos.x,
-            new_pos.y,
-            1,
-            1
-          );
-          DragPos.i = String(index);
-          DragPos.x = this.layout[index].x;
-          DragPos.y = this.layout[index].y;
+      // let parentRect = document
+      //   .getElementById("item-content")
+      //   .getBoundingClientRect();
+      let contentDivs = document.getElementsByClassName("item-content");
+      this.mouseInGrid = false;
+      let parentRect;
+      // console.log("-----------------++++", contentDivs);
+      contentDivs.forEach((contentDiv) => {
+        this.currentAboveId = contentDiv.firstChild.id;
+        // console.log("currentAboveId", this.currentAboveId);
+
+        parentRect = contentDiv.getBoundingClientRect();
+        if (
+          mouseXY.x > parentRect.left &&
+          mouseXY.x < parentRect.right &&
+          mouseXY.y > parentRect.top &&
+          mouseXY.y < parentRect.bottom
+        ) {
+          this.currentAboveLayout =
+            this.$refs[this.currentAboveId][0].$attrs.data.gridItems;
+          this.mouseInGrid = true;
         }
-        if (mouseInGrid === false) {
-          this.$refs.gridlayout.dragEvent(
-            "dragend",
-            "drop",
-            new_pos.x,
-            new_pos.y,
-            1,
-            1
-          );
-          this.layout = this.layout.filter((obj) => obj.i !== "drop");
-        }
-      }
+      });
     },
     dragend(e) {
-      let parentRect = document
-        .getElementById("content")
-        .getBoundingClientRect();
-      let mouseInGrid = false;
-      if (
-        mouseXY.x > parentRect.left &&
-        mouseXY.x < parentRect.right &&
-        mouseXY.y > parentRect.top &&
-        mouseXY.y < parentRect.bottom
-      ) {
-        mouseInGrid = true;
+      if (this.mouseInGrid === true) {
+        this.dragItem.x =
+          (this.currentAboveLayout.length * 2) % (this.colNum || 12);
+        this.dragItem.y = this.currentAboveLayout.length + (this.colNum || 12);
+        console.log("this.dragItem", this.dragItem);
+        this.currentAboveLayout.push(this.dragItem);
+        this.editStatus = true;
       }
-      if (mouseInGrid === true) {
-        alert(
-          `Dropped element props:\n${JSON.stringify(
-            DragPos,
-            ["x", "y", "w", "h"],
-            2
-          )}`
-        );
-        this.$refs.gridlayout.dragEvent(
-          "dragend",
-          "drop",
-          DragPos.x,
-          DragPos.y,
-          1,
-          1
-        );
-        this.layout = this.layout.filter((obj) => obj.i !== "drop");
-        // UNCOMMENT below if you want to add a grid-item
-        /*
-                this.layout.push({
-                    x: DragPos.x,
-                    y: DragPos.y,
-                    w: 1,
-                    h: 1,
-                    i: DragPos.i,
-                });
-                this.$refs.gridLayout.dragEvent('dragend', DragPos.i, DragPos.x,DragPos.y,1,1);
-                try {
-                    this.$refs.gridLayout.$children[this.layout.length].$refs.item.style.display="block";
-                } catch {
-                }
-                */
-      }
+    },
+    addParentArea(arr) {
+      arr.push({
+        title: this.addGridDialog.inputValue,
+        titleBgColor: this.addGridDialog.titleBgColor,
+        contentBgColor: this.addGridDialog.contentBgColor,
+        direction: 1,
+        grids: [],
+        x: (this.lsData.length * 2) % 12,
+        y: this.lsData.length + 12, // puts it at the bottom
+        w: 2,
+        h: 5,
+        i: uuid(),
+      });
+      this.editStatus = true;
+    },
+    addChildArea(arr) {
+      arr.push({
+        contentBgColor: "",
+        direction: 1,
+        gridItems: [],
+        x: (arr.length * 2) % 12,
+        y: arr.length + 12, // puts it at the bottom
+        w: 20,
+        h: 20,
+        i: uuid(),
+      });
+      this.editStatus = true;
+    },
+    dragClick(item) {
+      this.dragItem = {
+        itemType: item.itemType ? item.itemType : 0,
+        fontSize: 22,
+        border: 0,
+        shadow: 0,
+        fontColor: "",
+        direction: 0,
+        name: item.name,
+        src: item.src,
+        x: 100,
+        y: 0, // puts it at the bottom
+        w: 30,
+        h: 5,
+        i: uuid(),
+      };
+    },
+    addToCollections(item) {
+      this.collections.push({
+        itemType: item.itemType,
+        fontSize: item.fontSize,
+        border: item.border,
+        shadow: item.shadow,
+        fontColor: item.fontColor,
+        direction: item.direction,
+        name: item.name,
+        src: item.src,
+        x: (this.collections.length * 2) % 12,
+        y: 0, // puts it at the bottom
+        w: 30,
+        h: 5,
+        i: uuid(),
+      });
+      this.saveCollections();
+    },
+    copyItem(item, arr) {
+      arr.push({
+        itemType: item.itemType,
+        fontSize: item.fontSize,
+        border: item.border,
+        shadow: item.shadow,
+        contentBgColor: item.contentBgColor,
+        direction: item.direction,
+        name: item.name,
+        src: item.src,
+        x: item.x + item.w,
+        y: item.y, // puts it at the bottom
+        w: item.w,
+        h: item.h,
+        i: uuid(),
+      });
+      console.log("arr----", arr);
     },
   },
 };
@@ -1329,10 +1669,10 @@ export default {
     cursor: pointer;
     width: 60px;
     height: 40px;
-
     border-radius: 2px;
     padding: 1px;
     visibility: visible;
+    border: 1px solid grey;
   }
 }
 
@@ -1363,7 +1703,7 @@ export default {
   // height: auto;
 
   box-sizing: border-box;
-  position: relative;
+  // position: relative;
   margin: 10px 0px;
   display: flex;
   border: 1px solid rgb(109, 61, 143);
@@ -1371,29 +1711,12 @@ export default {
   font-weight: 400;
   letter-spacing: 0.01071em;
   flex-direction: column;
-  .main-title-box {
-    // width: auto;
-    // height: auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: row;
-    background: rgb(109, 61, 143);
-    box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 8px 0px,
-      rgba(0, 0, 0, 0.2) 0px 6px 20px 0px;
+  .plus {
+    display: inline;
+    color: black;
+    // position: absolute;
     // position: relative;
-    .plus {
-      // border: 1px solid rgb(9, 243, 224);
-      color: black;
-    }
-    .title-text {
-      // border: 1px solid blue;
-      line-height: 1.1;
-      font-size: 14px;
-      color: #ffffff;
-      background: none;
-      margin: 10px 30px;
-    }
+    cursor: pointer;
   }
   .container {
     // border: 1px solid red;
@@ -1424,12 +1747,13 @@ export default {
         display: flex;
         flex-direction: column;
         align-items: stretch;
-        .plus {
-          // border: 1px solid rgb(9, 243, 224);
-          color: black;
-          position: absolute;
-          position: relative;
-        }
+        // .plus {
+        //   // border: 1px solid rgb(9, 243, 224);
+        //   color: black;
+        //   // position: absolute;
+        //   position: relative;
+        //   cursor: pointer;
+        // }
         .item-content {
           width: 100%;
           height: 100%;
@@ -1541,11 +1865,81 @@ export default {
   margin-right: 10px;
 }
 .droppable-element {
-    width: 150px;
-    text-align: center;
-    background: #fdd;
-    border: 1px solid black;
-    margin: 10px 0;
-    padding: 10px;
+  width: 150px;
+  text-align: center;
+  background: #fdd;
+  border: 1px solid black;
+  margin: 10px 0;
+  padding: 10px;
+}
+.collectionClass {
+  width: 100%;
+  height: 200px;
+  padding: 10px;
+  overflow: visible;
+  box-sizing: border-box;
+  .content {
+    border: 1px solid grey;
+    border-radius: 2px;
+    width: 100%;
+    height: 100%;
+  }
+  .grid {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+
+    img {
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      background-size: contain;
+      padding: 1px;
+      visibility: visible;
+    }
+  }
+  .grid-big {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    -webkit-box-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    align-items: center;
+    .box {
+      cursor: pointer;
+      background: rgb(83, 113, 189);
+      visibility: visible;
+      width: 100%;
+      height: 100%;
+      padding: 2px;
+      padding-left: 4px;
+      box-sizing: border-box;
+      .img-title {
+        width: 100%;
+        height: 13px;
+        margin-bottom: 10px;
+        text-align: center;
+        vertical-align: middle;
+        color: white;
+        font-size: 6.7px;
+        line-height: 11px;
+        font-weight: 550;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+      img {
+        cursor: pointer;
+        width: calc(100% - 12px);
+        height: calc(100% - 27px);
+        padding: 5px;
+        margin: 2px 2px 0pxf;
+        background: #fff;
+      }
+    }
+  }
 }
 </style>
