@@ -2,19 +2,21 @@
   <div id="contianer" class="contianer">
     <div class="header"></div>
     <grid-layout
-
-      :col-num="test1"
+      :mydata="searchForm"
+      :layout.sync="lsData"
       :row-height="5"
       :min-height="1"
+      :col-num="test1('abc')"
+      ref="abc"
     >
     </grid-layout>
-
-    <!-- <hr />
+    <hr />
 
     <div class="collectionClass">
       <grid-layout
+        ref="collection"
         :layout.sync="collections"
-        :col-num="150"
+        :col-num="test1('collection')"
         :row-height="5"
         :min-height="1"
         :vertical-compact="true"
@@ -192,7 +194,7 @@
           </div>
         </grid-item>
       </grid-layout>
-    </div> -->
+    </div>
     <div>
       <div>
         <el-form
@@ -332,6 +334,7 @@
         </div>
         <hr />
         <grid-layout
+          ref="lsData"
           :layout.sync="lsData"
           :col-num="12"
           :row-height="50"
@@ -340,7 +343,7 @@
           :vertical-compact="true"
           :use-css-transforms="true"
           :auto-size="true"
-          @layout-updated="layoutUpdatedEvent"
+          @layout-updated="layoutUpdatedEvent()"
         >
           <grid-item
             v-for="ls in lsData"
@@ -420,8 +423,9 @@
                 :style="{ background: ls.contentBgColor }"
               >
                 <grid-layout
+                  :ref="ls.i"
                   :layout.sync="ls.grids"
-                  :col-num="150"
+                  :col-num="test1(ls.i)"
                   :row-height="5"
                   :min-height="1"
                   :is-draggable="editStatus"
@@ -429,7 +433,7 @@
                   :vertical-compact="true"
                   :use-css-transforms="true"
                   :auto-size="true"
-                  @layout-updated="layoutUpdatedEvent"
+                  @layout-updated="layoutUpdatedEvent(ls.i)"
                 >
                   <grid-item
                     v-for="grid in ls.grids"
@@ -519,15 +523,16 @@
                             :id="grid.i"
                             :ref="grid.i"
                             :layout.sync="grid.gridItems"
-                            :col-num="150"
+                            :col-num="test1(grid.i)"
                             :row-height="5"
                             :min-height="1"
                             :is-draggable="editStatus"
                             :is-resizable="editStatus"
                             :vertical-compact="true"
                             :use-css-transforms="true"
-                            :auto-size="true"
-                            @layout-updated="layoutUpdatedEvent"
+                            :auto-size="false"
+                            style="border: 1px solid red; height: 100%"
+                            @layout-updated="layoutUpdatedEvent(grid.i)"
                           >
                             <grid-item
                               v-for="gridItem in grid.gridItems"
@@ -1099,7 +1104,7 @@ export default {
     this.getLsData();
     this.getCollections();
   },
-
+  computed: {},
   watch: {
     // lsData: {
     // handler(newValue, oldValue) {
@@ -1125,6 +1130,20 @@ export default {
   },
   beforeDestroy() {},
   methods: {
+    test1(ref) {
+      console.log("------ref",ref);
+      console.log("------", this.$refs[ref]);
+      if (this.$refs[ref]) {
+        let el = this.$refs[ref].$el||this.$refs[ref][0].$el;
+        console.log("------el", el);
+        console.log("------el.offsetWidth", el.offsetWidth);
+        console.log(
+          "------el.offsetWidth/100",
+          el.offsetWidth / 100
+        );
+        return el.offsetWidth / 10;
+      }
+    },
     changeFontSize(item, num) {
       if (item.fontSize && item.fontSize + num > 12) {
         item.fontSize += num;
@@ -1474,8 +1493,9 @@ export default {
       this.addImageDialog.currentArray = arr;
       console.log("openAddImageDialog", this.addImageDialog.currentArray);
     },
-    layoutUpdatedEvent() {
+    layoutUpdatedEvent(ref) {
       // console.log("update");
+      this.test1(ref)
       this.saveLsData();
     },
     saveLsData() {
@@ -1485,6 +1505,7 @@ export default {
       localStorage.setItem("lsTabs", JSON.stringify(this.lsTabs));
     },
     saveCollections() {
+      this.test1("collection")
       localStorage.setItem("collections", JSON.stringify(this.collections));
     },
     clearGridDialog() {
