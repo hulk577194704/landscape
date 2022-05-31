@@ -6,7 +6,7 @@
       :layout.sync="lsData"
       :row-height="5"
       :min-height="1"
-      :col-num="test1('abc')"
+      :col-num="dynamicColNum('abc')"
       ref="abc"
     >
     </grid-layout>
@@ -16,13 +16,16 @@
       <grid-layout
         ref="collection"
         :layout.sync="collections"
-        :col-num="test1('collection')"
+        :col-num="dynamicColNum('collection')"
         :row-height="5"
         :min-height="1"
         :vertical-compact="true"
         :use-css-transforms="true"
         :auto-size="true"
+        :is-draggable="false"
+        :is-resizable="true"
         @layout-updated="saveCollections"
+        
       >
         <grid-item
           v-for="gridItem in collections"
@@ -32,6 +35,7 @@
           :h="gridItem.h"
           :i="gridItem.i"
           :key="gridItem.i"
+          
         >
           <span
             v-show="editStatus"
@@ -130,6 +134,10 @@
             >x</span
           >
           <div
+          
+          @drag="drag"
+          @dragend="dragend"
+          @mousedown="dragClick(gridItem)"
             class="content"
             :style="{
               border: gridItem.border == 0 ? 'none' : '',
@@ -169,6 +177,7 @@
               />
             </div>
             <div
+              draggable="true"
               class="text-item"
               :style="{
                 background: gridItem.bgColor,
@@ -176,6 +185,7 @@
               v-else
             >
               <div
+                
                 :style="{
                   color: gridItem.fontColor,
                   'font-size': gridItem.fontSize
@@ -425,7 +435,7 @@
                 <grid-layout
                   :ref="ls.i"
                   :layout.sync="ls.grids"
-                  :col-num="test1(ls.i)"
+                  :col-num="dynamicColNum(ls.i)"
                   :row-height="5"
                   :min-height="1"
                   :is-draggable="editStatus"
@@ -523,7 +533,7 @@
                             :id="grid.i"
                             :ref="grid.i"
                             :layout.sync="grid.gridItems"
-                            :col-num="test1(grid.i)"
+                            :col-num="dynamicColNum(grid.i)"
                             :row-height="5"
                             :min-height="1"
                             :is-draggable="editStatus"
@@ -1125,22 +1135,22 @@ export default {
       },
       false
     );
-    console.log("...........", this);
-    console.log("searchForm...........", this.$refs["searchForm"]);
+    // console.log("...........", this);
+    // console.log("searchForm...........", this.$refs["searchForm"]);
   },
   beforeDestroy() {},
   methods: {
-    test1(ref) {
-      console.log("------ref",ref);
+    dynamicColNum(ref) {
+      // console.log("------ref",ref);
       console.log("------", this.$refs[ref]);
       if (this.$refs[ref]) {
         let el = this.$refs[ref].$el||this.$refs[ref][0].$el;
-        console.log("------el", el);
-        console.log("------el.offsetWidth", el.offsetWidth);
-        console.log(
-          "------el.offsetWidth/100",
-          el.offsetWidth / 100
-        );
+        // console.log("------el", el);
+        // console.log("------el.offsetWidth", el.offsetWidth);
+        // console.log(
+        //   "------el.offsetWidth/100",
+        //   el.offsetWidth / 100
+        // );
         return el.offsetWidth / 10;
       }
     },
@@ -1495,7 +1505,7 @@ export default {
     },
     layoutUpdatedEvent(ref) {
       // console.log("update");
-      this.test1(ref)
+      this.dynamicColNum(ref)
       this.saveLsData();
     },
     saveLsData() {
@@ -1505,7 +1515,7 @@ export default {
       localStorage.setItem("lsTabs", JSON.stringify(this.lsTabs));
     },
     saveCollections() {
-      this.test1("collection")
+      this.dynamicColNum("collection")
       localStorage.setItem("collections", JSON.stringify(this.collections));
     },
     clearGridDialog() {
@@ -1551,13 +1561,15 @@ export default {
       this.saveLsData();
     },
     drag(e) {
+       console.log("-----------------++++");
+      this.mouseInGrid = false;
       // let parentRect = document
       //   .getElementById("item-content")
       //   .getBoundingClientRect();
       let contentDivs = document.getElementsByClassName("item-content");
-      this.mouseInGrid = false;
+     
       let parentRect;
-      // console.log("-----------------++++", contentDivs);
+      console.log("-----------------++++", contentDivs);
       contentDivs.forEach((contentDiv) => {
         this.currentAboveId = contentDiv.firstChild.id;
         // console.log("currentAboveId", this.currentAboveId);
@@ -1572,6 +1584,7 @@ export default {
           this.currentAboveLayout =
             this.$refs[this.currentAboveId][0].$attrs.data.gridItems;
           this.mouseInGrid = true;
+          console.log("this.mouseInGrid",this.mouseInGrid);
         }
       });
     },
@@ -1614,21 +1627,24 @@ export default {
       this.editStatus = true;
     },
     dragClick(item) {
+      console.log("item",item);
       this.dragItem = {
-        itemType: item.itemType ? item.itemType : 0,
-        fontSize: 22,
-        border: 0,
-        shadow: 0,
-        fontColor: "",
+        itemType: item.itemType || 0,
+        fontSize: item.fontSize||"",
+        border: item.border||0,
+        shadow: item.shadow||0,
+        fontColor: item.bgColor||"",
+        bgColor:item.bgColor||"",
         direction: 0,
-        name: item.name,
-        src: item.src,
-        x: 100,
-        y: 0, // puts it at the bottom
-        w: 30,
-        h: 5,
+        name: item.name||"",
+        src: item.src||"",
+        x: 0,
+        y: 999, // puts it at the bottom
+        w: item.w||30,
+        h: item.h||5,
         i: uuid(),
       };
+      console.log("this.dragItem",this.dragItem);
     },
     addToCollections(item) {
       this.collections.push({
