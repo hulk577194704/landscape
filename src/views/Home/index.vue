@@ -62,12 +62,12 @@
           >
             <div
               class="landscape"
-              :style="{ 'flex-direction': ls.direction == 1 && 'row' }"
+              :style="{ 'flex-direction': ls.direction == 1 ?'row':'column' }"
             >
               <div
                 class="main-title-box"
                 :style="{
-                  'flex-direction': ls.direction == 1 && 'column',
+                  'flex-direction': ls.direction == 1?'column':'row',
                   background: ls.titleBgColor,
                 }"
               >
@@ -163,13 +163,13 @@
                       <div
                         class="main"
                         :style="{
-                          'flex-direction': grid.direction == 1 && 'row',
+                          'flex-direction': grid.direction == 1 ?'row':'column',
                         }"
                       >
                         <div
                           class="item-title-box"
                           :style="{
-                            'flex-direction': grid.direction == 1 && 'column',
+                            'flex-direction': grid.direction == 1 ?'column':'row',
                             background: grid.titleBgColor,
                           }"
                         >
