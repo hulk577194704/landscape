@@ -1,207 +1,215 @@
 <template>
   <div id="contianer" class="contianer">
-    <div class="header"></div>
-    <grid-layout
-      :mydata="searchForm"
-      :layout.sync="lsData"
-      :row-height="5"
-      :min-height="1"
-      :col-num="dynamicColNum('abc')"
-      ref="abc"
+    <!-- <hr /> -->
+    <el-drawer
+      :wrapperClosable="true"
+      :destroy-on-close="true"
+      :modal="false"
+      title="组件库"
+      :visible.sync="moduleDrawer"
+      direction="rtl"
     >
-    </grid-layout>
-    <hr />
-
-    <div class="collectionClass">
-      <grid-layout
-        ref="collection"
-        :layout.sync="collections"
-        :col-num="dynamicColNum('collection')"
-        :row-height="5"
-        :min-height="1"
-        :vertical-compact="true"
-        :use-css-transforms="true"
-        :auto-size="true"
-        :is-draggable="false"
-        :is-resizable="true"
-        @layout-updated="saveCollections"
-      >
-        <grid-item
-          v-for="gridItem in collections"
-          :x="gridItem.x"
-          :y="gridItem.y"
-          :w="gridItem.w"
-          :h="gridItem.h"
-          :i="gridItem.i"
-          :key="gridItem.i"
+      <div class="collectionClass">
+        <grid-layout
+          ref="collection"
+          :layout.sync="collections"
+          :col-num="dynamicColNum('collection')"
+          :row-height="5"
+          :min-height="1"
+          :vertical-compact="true"
+          :use-css-transforms="true"
+          :auto-size="true"
+          :is-draggable="false"
+          :is-resizable="true"
+          @layout-updated="saveCollections"
         >
-          <span
-            v-show="editStatus"
-            style="position: absolute; left: 2px; top: 0; cursor: pointer"
+          <grid-item
+            v-for="gridItem in collections"
+            :x="gridItem.x"
+            :y="gridItem.y"
+            :w="gridItem.w"
+            :h="gridItem.h"
+            :i="gridItem.i"
+            :key="gridItem.i"
           >
-            <el-popover placement="bottom-end" trigger="hover">
-              <div class="pop-list">
-                <div class="list-item" @click="changeImageFormat(gridItem)">
-                  切换样式
-                </div>
-                <div class="list-item" @click="changeItemBorder(gridItem)">
-                  {{ gridItem.border == 1 ? "隐藏边框" : "显示边框" }}
-                </div>
-                <div class="list-item" @click="changeItemShadow(gridItem)">
-                  {{ gridItem.shadow == 1 ? "隐藏阴影" : "显示阴影" }}
-                </div>
-                <div v-if="gridItem.itemType == 2">
-                  <div class="list-item" @click="changeItemDirection(gridItem)">
-                    切换方向
+            <span
+              v-show="editStatus"
+              style="position: absolute; left: 2px; top: 0; cursor: pointer"
+            >
+              <el-popover placement="bottom-end" trigger="hover">
+                <div class="pop-list">
+                  <div class="list-item" @click="changeImageFormat(gridItem)">
+                    切换样式
                   </div>
-                  <div class="list-item">
-                    <div>
-                      <div>内容</div>
-                      <el-input
-                        clearable
-                        class="input"
-                        size="mini"
-                        style="margin: 0 5px"
-                        v-model="gridItem.name"
-                        @blur="saveLsData"
-                      ></el-input>
+                  <div class="list-item" @click="changeItemBorder(gridItem)">
+                    {{ gridItem.border == 1 ? "隐藏边框" : "显示边框" }}
+                  </div>
+                  <div class="list-item" @click="changeItemShadow(gridItem)">
+                    {{ gridItem.shadow == 1 ? "隐藏阴影" : "显示阴影" }}
+                  </div>
+                  <div v-if="gridItem.itemType == 2">
+                    <div
+                      class="list-item"
+                      @click="changeItemDirection(gridItem)"
+                    >
+                      切换方向
                     </div>
-                  </div>
+                    <div class="list-item">
+                      <div>
+                        <div>内容</div>
+                        <el-input
+                          clearable
+                          class="input"
+                          size="mini"
+                          style="margin: 0 5px"
+                          v-model="gridItem.name"
+                          @blur="saveLsData"
+                        ></el-input>
+                      </div>
+                    </div>
 
-                  <div class="list-item">
-                    <div>
-                      <div>背景颜色</div>
-                      <el-input
-                        clearable
-                        class="input"
-                        size="mini"
-                        style="margin: 0 5px"
-                        v-model="gridItem.bgColor"
-                        @blur="saveLsData"
-                      ></el-input>
+                    <div class="list-item">
+                      <div>
+                        <div>背景颜色</div>
+                        <el-input
+                          clearable
+                          class="input"
+                          size="mini"
+                          style="margin: 0 5px"
+                          v-model="gridItem.bgColor"
+                          @blur="saveLsData"
+                        ></el-input>
+                      </div>
+                    </div>
+                    <div class="list-item">
+                      <div>
+                        <div>字体颜色</div>
+                        <el-input
+                          clearable
+                          class="input"
+                          size="mini"
+                          style="margin: 0 5px"
+                          v-model="gridItem.fontColor"
+                          @blur="saveLsData"
+                        ></el-input>
+                      </div>
+                    </div>
+                    <div class="list-item">
+                      <div>
+                        <div>字体</div>
+                        <el-button
+                          style="padding: 5px 8px"
+                          size="mini"
+                          type="success"
+                          @click="changeFontSize(gridItem, -2)"
+                          >-</el-button
+                        >
+                        <el-input
+                          class="input"
+                          size="mini"
+                          style="margin: 0 5px; width: 30px"
+                          v-model="gridItem.fontSize"
+                          @blur="saveLsData"
+                        ></el-input>
+                        <el-button
+                          style="padding: 5px 8px"
+                          size="mini"
+                          type="success"
+                          @click="changeFontSize(gridItem, 2)"
+                          >+</el-button
+                        >
+                      </div>
                     </div>
                   </div>
-                  <div class="list-item">
-                    <div>
-                      <div>字体颜色</div>
-                      <el-input
-                        clearable
-                        class="input"
-                        size="mini"
-                        style="margin: 0 5px"
-                        v-model="gridItem.fontColor"
-                        @blur="saveLsData"
-                      ></el-input>
-                    </div>
-                  </div>
-                  <div class="list-item">
-                    <div>
-                      <div>字体</div>
-                      <el-button
-                        style="padding: 5px 8px"
-                        size="mini"
-                        type="success"
-                        @click="changeFontSize(gridItem, -2)"
-                        >-</el-button
-                      >
-                      <el-input
-                        class="input"
-                        size="mini"
-                        style="margin: 0 5px; width: 30px"
-                        v-model="gridItem.fontSize"
-                        @blur="saveLsData"
-                      ></el-input>
-                      <el-button
-                        style="padding: 5px 8px"
-                        size="mini"
-                        type="success"
-                        @click="changeFontSize(gridItem, 2)"
-                        >+</el-button
-                      >
-                    </div>
+                </div>
+                <i class="el-icon-plus" slot="reference"></i>
+              </el-popover>
+            </span>
+            <span
+              v-show="editStatus"
+              class="remove"
+              @click="removeItem(gridItem.i, collections)"
+              >x</span
+            >
+            <div
+              @drag="drag"
+              @dragend="dragend"
+              @mousedown="dragClick(gridItem)"
+              class="content"
+              :style="{
+                border: gridItem.border == 0 ? 'none' : '',
+                'box-shadow':
+                  gridItem.shadow == 1
+                    ? 'rgba(0, 0, 0, 0.2) 0px 4px 8px 0px,rgba(0, 0, 0, 0.2) 0px 6px 20px 0px'
+                    : '',
+              }"
+            >
+              <div
+                v-if="gridItem.itemType == 1"
+                :key="gridItem.name"
+                class="grid-big"
+              >
+                <div class="box" :style="{ background: gridItem.color }">
+                  <img
+                    crossOrigin="Anonymous"
+                    :src="gridItem.src"
+                    :alt="gridItem.name"
+                  />
+                  <div class="img-title">
+                    {{ gridItem.name }}
                   </div>
                 </div>
               </div>
-              <i class="el-icon-plus" slot="reference"></i>
-            </el-popover>
-          </span>
-          <span
-            v-show="editStatus"
-            class="remove"
-            @click="removeItem(gridItem.i, collections)"
-            >x</span
-          >
-          <div
-            @drag="drag"
-            @dragend="dragend"
-            @mousedown="dragClick(gridItem)"
-            class="content"
-            :style="{
-              border: gridItem.border == 0 ? 'none' : '',
-              'box-shadow':
-                gridItem.shadow == 1
-                  ? 'rgba(0, 0, 0, 0.2) 0px 4px 8px 0px,rgba(0, 0, 0, 0.2) 0px 6px 20px 0px'
-                  : '',
-            }"
-          >
-            <div
-              v-if="gridItem.itemType == 1"
-              :key="gridItem.name"
-              class="grid-big"
-            >
-              <div class="box" :style="{ background: gridItem.color }">
+              <div
+                v-else-if="gridItem.itemType == 0"
+                :key="gridItem.name"
+                class="grid"
+              >
                 <img
+                  height="48"
+                  width="48"
                   crossOrigin="Anonymous"
                   :src="gridItem.src"
                   :alt="gridItem.name"
                 />
-                <div class="img-title">
+              </div>
+              <div
+                draggable="true"
+                class="text-item"
+                :style="{
+                  background: gridItem.bgColor,
+                }"
+                v-else
+              >
+                <div
+                  :style="{
+                    color: gridItem.fontColor,
+                    'font-size': gridItem.fontSize
+                      ? gridItem.fontSize + 'px'
+                      : '',
+                    'writing-mode':
+                      gridItem.direction && gridItem.direction != 0
+                        ? 'vertical-rl'
+                        : '',
+                    transform: gridItem.direction == 2 ? 'rotate(180deg)' : '',
+                  }"
+                >
                   {{ gridItem.name }}
                 </div>
               </div>
             </div>
-            <div
-              v-else-if="gridItem.itemType == 0"
-              :key="gridItem.name"
-              class="grid"
-            >
-              <img
-                height="48"
-                width="48"
-                crossOrigin="Anonymous"
-                :src="gridItem.src"
-                :alt="gridItem.name"
-              />
-            </div>
-            <div
-              draggable="true"
-              class="text-item"
-              :style="{
-                background: gridItem.bgColor,
-              }"
-              v-else
-            >
-              <div
-                :style="{
-                  color: gridItem.fontColor,
-                  'font-size': gridItem.fontSize
-                    ? gridItem.fontSize + 'px'
-                    : '',
-                  'writing-mode':
-                    gridItem.direction && gridItem.direction != 0
-                      ? 'vertical-rl'
-                      : '',
-                  transform: gridItem.direction == 2 ? 'rotate(180deg)' : '',
-                }"
-              >
-                {{ gridItem.name }}
-              </div>
-            </div>
-          </div>
-        </grid-item>
-      </grid-layout>
-    </div>
-    <div>
+          </grid-item>
+        </grid-layout>
+      </div>
+    </el-drawer>
+
+    <el-drawer
+      :wrapperClosable="true"
+      :modal="false"
+      title="搜索"
+      :visible.sync="searchDrawer"
+      direction="rtl"
+    >
       <div>
         <el-form
           :mydata="searchForm"
@@ -292,9 +300,9 @@
           </div>
         </div>
       </div>
-    </div>
+    </el-drawer>
 
-    <hr />
+    <!-- <hr /> -->
 
     <el-tabs
       class="tabsClass"
@@ -336,6 +344,18 @@
             size="mini"
             @click="editStatus = !editStatus"
             >开启编辑</el-button
+          >
+          <el-button
+            type="primary"
+            size="mini"
+            @click="moduleDrawer = !moduleDrawer"
+            >组件库</el-button
+          >
+          <el-button
+            type="primary"
+            size="mini"
+            @click="searchDrawer = !searchDrawer"
+            >搜索</el-button
           >
           <!-- <el-button type="primary" size="mini" @click="addLsShow">隐藏 </el-button> -->
         </div>
@@ -538,9 +558,9 @@
                             :vertical-compact="true"
                             :use-css-transforms="true"
                             :auto-size="false"
-                            style="border: 1px solid red; height: 100%"
                             @layout-updated="layoutUpdatedEvent(grid.i)"
                           >
+                            <!-- style="border: 1px solid red; height: 100%" -->
                             <grid-item
                               v-for="gridItem in grid.gridItems"
                               :x="gridItem.x"
@@ -1886,6 +1906,8 @@ export default {
           moved: false,
         },
       ],
+      moduleDrawer: false,
+      searchDrawer: false,
     };
   },
   components: {
@@ -1930,7 +1952,7 @@ export default {
         let el = this.$refs[ref].$el || this.$refs[ref][0].$el;
 
         if (el) {
-          console.log("走了",el.offsetWidth);
+          // console.log("走了", el.offsetWidth);
           return el.offsetWidth / 10;
         }
         return 12;
@@ -1957,6 +1979,7 @@ export default {
         this.collections = JSON.parse(collectionsStr);
       } else {
         this.collections = this.defaultCollections;
+        console.log("走了   ");
       }
     },
     getLsTabs() {
@@ -2018,6 +2041,7 @@ export default {
     handleTabsClick(tab) {
       console.log("currentTab", this.tabsValue);
       localStorage.setItem("tabsValue", this.tabsValue);
+      this.$router.go(0);
       this.getLsData();
     },
     resetForm(formName) {
@@ -2297,7 +2321,7 @@ export default {
       localStorage.setItem("lsTabs", JSON.stringify(this.lsTabs));
     },
     saveCollections() {
-      this.dynamicColNum("collection");
+      console.log("dsdfsdfsfd");
       localStorage.setItem("collections", JSON.stringify(this.collections));
     },
     clearGridDialog() {
@@ -2476,7 +2500,6 @@ export default {
 }
 .header {
   width: 100%;
-  padding-top: 50px;
   /* text-align: center; */
 }
 .header-item {
@@ -2692,11 +2715,11 @@ export default {
   padding: 10px;
 }
 .collectionClass {
-  width: 100%;
-  height: 200px;
+  width: 90%;
+  height: 90%;
   padding: 10px;
   overflow: visible;
-  box-sizing: border-box;
+  border: 1px solid red;
   .content {
     border: 1px solid grey;
     border-radius: 2px;
